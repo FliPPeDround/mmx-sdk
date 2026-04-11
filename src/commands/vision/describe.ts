@@ -22,7 +22,7 @@ const MIME_TYPES: Record<string, string> = {
   '.webp': 'image/webp',
 };
 
-async function toDataUri(image: string): Promise<string> {
+export async function toDataUri(image: string): Promise<string> {
   if (image.startsWith('data:')) return image;
 
   if (image.startsWith('http://') || image.startsWith('https://')) {

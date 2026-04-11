@@ -1,12 +1,12 @@
 <img src="https://file.cdn.minimax.io/public/MMX.png" alt="MiniMax" width="100%" />
 
 <p align="center">
-  <strong>The official CLI for the MiniMax AI Platform</strong><br>
-  Built for AI agents. Generate text, images, video, speech, and music — from any agent or terminal.
+  <strong>SDK for the MiniMax AI Platform</strong><br>
+  Generate text, images, video, speech, and music — from any Node.js application.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/mmx-cli"><img src="https://img.shields.io/npm/v/mmx-cli.svg" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/mmx-sdk"><img src="https://img.shields.io/npm/v/mmx-sdk.svg" alt="npm version" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg" alt="Node.js >= 18" /></a>
 </p>
@@ -14,6 +14,17 @@
 <p align="center">
   <a href="README_CN.md">中文文档</a> · <a href="https://platform.minimax.io">Global Platform</a> · <a href="https://platform.minimaxi.com">CN Platform</a>
 </p>
+
+***
+**[FliPPeDround](https://github.com/flippedround)**
+
+**Frontend Engineer** · **Open Source Enthusiast** · **Open to Work**
+
+<samp>
+Interested in my projects? Check out my resume · <a href='https://flippedround.site/'>resume</a>
+</samp>
+
+***
 
 ## Features
 
@@ -29,11 +40,7 @@
 ## Install
 
 ```bash
-# For AI agents (OpenClaw, Cursor, Claude Code, etc.): add skill to your agent
-npx skills add MiniMax-AI/cli -y -g
-
-# Or install CLI globally for terminal use
-npm install -g mmx-cli
+npm install mmx-sdk
 ```
 
 > Requires [Node.js](https://nodejs.org) 18+
@@ -42,114 +49,182 @@ npm install -g mmx-cli
 
 ## Quick Start
 
-```bash
-# Authenticate
-mmx auth login --api-key sk-xxxxx
+```typescript
+import { MiniMaxSDK } from 'mmx-sdk';
 
-# Start creating
-mmx text chat --message "What is MiniMax?"
-mmx image "A cat in a spacesuit"
-mmx speech synthesize --text "Hello!" --out hello.mp3
-mmx video generate --prompt "Ocean waves at sunset"
-mmx music generate --prompt "Upbeat pop" --lyrics "[verse] La da dee, sunny day"
-mmx search "MiniMax AI latest news"
-mmx vision photo.jpg
-mmx quota
+const sdk = new MiniMaxSDK({ apiKey: 'sk-xxxxx' });
+
+// Text chat
+const response = await sdk.chat({ message: 'What is MiniMax?' });
+console.log(response);
+
+// Image generation
+const image = await sdk.generateImage({ prompt: 'A cat in a spacesuit' });
+console.log(image);
+
+// Speech synthesis
+await sdk.speech({ text: 'Hello!', out: 'hello.mp3' });
+
+// Video generation (async)
+const { taskId } = await sdk.generateVideo({ prompt: 'Ocean waves at sunset', async: true });
+const task = await sdk.getVideoTask({ taskId });
+
+// Music generation
+const music = await sdk.generateMusic({ prompt: 'Upbeat pop', lyrics: '[verse] La da dee, sunny day' });
+
+// Web search
+const results = await sdk.search({ query: 'MiniMax AI latest news' });
+
+// Image vision
+const description = await sdk.describeImage({ image: 'photo.jpg' });
+
+// Check quota
+const quota = await sdk.getQuota();
 ```
 
-## Commands
+## API Reference
 
-### `mmx text`
+### `new MiniMaxSDK(options)`
 
-```bash
-mmx text chat --message "Write a poem"
-mmx text chat --model MiniMax-M2.7-highspeed --message "Hello" --stream
-mmx text chat --system "You are a coding assistant" --message "Fizzbuzz in Go"
-mmx text chat --message "user:Hi" --message "assistant:Hey!" --message "How are you?"
-cat messages.json | mmx text chat --messages-file - --output json
+Initialize the SDK with options:
+
+```typescript
+const sdk = new MiniMaxSDK({
+  apiKey: 'sk-xxxxx',      // Your API key
+  region: 'global',       // 'global' or 'cn', auto-detected by default
+  baseUrl: '...',         // Custom base URL (optional)
+  timeout: 60000,         // Request timeout in ms (optional)
+});
 ```
 
-### `mmx image`
+### `sdk.chat(request)`
 
-```bash
-mmx image "A cat in a spacesuit"
-mmx image generate --prompt "A cat" --n 3 --aspect-ratio 16:9
-mmx image generate --prompt "Logo" --out-dir ./out/
+Send a chat message with support for streaming and multi-turn conversations.
+
+```typescript
+// Non-streaming
+const response = await sdk.chat({ message: 'Hello!' });
+
+// Streaming
+const stream = await sdk.chat({ message: 'Hello!', stream: true });
+for await (const event of stream) {
+  console.log(event);
+}
 ```
 
-### `mmx video`
+### `sdk.speech(request)`
 
-```bash
-mmx video generate --prompt "Ocean waves at sunset" --async
-mmx video generate --prompt "A robot painting" --download sunset.mp4
-mmx video task get --task-id 123456
-mmx video download --file-id 176844028768320 --out video.mp4
+Synthesize speech from text.
+
+```typescript
+// Non-streaming
+await sdk.speech({ text: 'Hello!', out: 'hello.mp3' });
+
+// Streaming
+const stream = await sdk.speech({ text: 'Hello!', stream: true });
+for await (const chunk of stream) {
+  // process audio chunks
+}
 ```
 
-### `mmx speech`
+### `sdk.voices(language?)`
 
-```bash
-mmx speech synthesize --text "Hello!" --out hello.mp3
-mmx speech synthesize --text "Stream me" --stream | mpv -
-mmx speech synthesize --text "Hi" --voice English_magnetic_voiced_man --speed 1.2
-echo "Breaking news" | mmx speech synthesize --text-file - --out news.mp3
-mmx speech voices
+Get available system voices.
+
+```typescript
+const voices = await sdk.voices();
+const chineseVoices = await sdk.voices('Chinese');
 ```
 
-### `mmx music`
+### `sdk.generateImage(request)`
 
-```bash
-mmx music generate --prompt "Upbeat pop" --lyrics "[verse] La da dee, sunny day"
-mmx music generate --prompt "Jazz" --lyrics "La la la" --out song.mp3
-mmx music generate --prompt "Cinematic orchestral" --instrumental --out bgm.mp3
+Generate images from text prompts.
+
+```typescript
+const image = await sdk.generateImage({
+  prompt: 'A cat in a spacesuit',
+  n: 3,
+  aspectRatio: '16:9',
+});
 ```
 
-### `mmx vision`
+### `sdk.generateVideo(request)`
 
-```bash
-mmx vision photo.jpg
-mmx vision describe --image https://example.com/img.jpg --prompt "What breed?"
-mmx vision describe --file-id file-123
+Generate videos from text prompts.
+
+```typescript
+// Async (returns task ID)
+const { taskId } = await sdk.generateVideo({
+  prompt: 'Ocean waves at sunset',
+  async: true,
+});
+
+// Sync (waits for completion)
+const video = await sdk.generateVideo({
+  prompt: 'A robot painting',
+});
 ```
 
-### `mmx search`
+### `sdk.getVideoTask({ taskId })`
 
-```bash
-mmx search "MiniMax AI"
-mmx search query --q "latest news" --output json
+Get video generation task status.
+
+```typescript
+const task = await sdk.getVideoTask({ taskId: '123456' });
 ```
 
-### `mmx auth`
+### `sdk.downloadVideo(request)`
 
-```bash
-mmx auth login --api-key sk-xxxxx
-mmx auth login                    # OAuth browser flow
-mmx auth status
-mmx auth refresh
-mmx auth logout
+Download a generated video by file ID.
+
+```typescript
+await sdk.downloadVideo({ fileId: '176844028768320', out: 'video.mp4' });
 ```
 
-### `mmx config` · `mmx quota`
+### `sdk.generateMusic(request)`
 
-```bash
-mmx quota
-mmx config show
-mmx config set --key region --value cn
-mmx config export-schema | jq .
+Generate music from text prompts.
+
+```typescript
+// Non-streaming
+const music = await sdk.generateMusic({
+  prompt: 'Upbeat pop',
+  lyrics: '[verse] La da dee, sunny day',
+});
+
+// Streaming
+const stream = await sdk.generateMusic({ prompt: 'Jazz', stream: true });
+for await (const chunk of stream) {
+  // process audio chunks
+}
 ```
 
-### `mmx update`
+### `sdk.search({ query })`
 
-```bash
-mmx update
-mmx update latest
+Perform a web search.
+
+```typescript
+const results = await sdk.search({ query: 'MiniMax AI latest news' });
 ```
 
-## Thanks to
+### `sdk.describeImage(request)`
 
-<a href="https://github.com/MiniMax-AI/cli/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=MiniMax-AI/cli" />
-</a>
+Describe or analyze an image.
+
+```typescript
+const description = await sdk.describeImage({
+  image: 'photo.jpg',      // file path, URL, or file ID
+  prompt: 'What breed is this cat?',
+});
+```
+
+### `sdk.getQuota()`
+
+Get your current API quota usage.
+
+```typescript
+const quota = await sdk.getQuota();
+```
 
 ## License
 
