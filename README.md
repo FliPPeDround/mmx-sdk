@@ -1,5 +1,7 @@
 <img src="https://file.cdn.minimax.io/public/MMX.png" alt="MiniMax" width="100%" />
 
+> **⚠️ Deprecated** — This repository has been merged into the official [mmx-cli](https://github.com/MiniMax-AI/cli). Please use the [official version](https://github.com/MiniMax-AI/cli) instead. See [#122](https://github.com/MiniMax-AI/cli/pull/122) for details.
+
 <p align="center">
   <strong>SDK for the MiniMax AI Platform</strong><br>
   Generate text, images, video, speech, and music — from any Node.js application.

@@ -1,5 +1,7 @@
 <img src="https://file.cdn.minimax.io/public/MMX.png" alt="MiniMax" width="100%" />
 
+> **⚠️ 已弃用** — 此仓库已合并到官方 [mmx-cli](https://github.com/MiniMax-AI/cli)。请使用[官方版本](https://github.com/MiniMax-AI/cli)。详情请查看 [#122](https://github.com/MiniMax-AI/cli/pull/122)。
+
 <p align="center">
   <strong>MiniMax AI 开放平台 SDK</strong><br>
   在任意 Node.js 应用中生成文字、图像、视频、语音和音乐。
